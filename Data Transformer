@@ -1,0 +1,140 @@
+SELECT c.CustomerID, c.FirstName, c.LastName, o.OrderID, o.OrderDate, o.TotalAmount
+FROM Customers c
+INNER JOIN Orders o
+ON c.CustomerID = o.CustomerID;
+
+
+
+
+SELECT c.CustomerID, c.FirstName, c.LastName, o.OrderID, o.TotalAmount
+FROM Customers c
+LEFT JOIN Orders o
+ON c.CustomerID = o.CustomerID;
+
+
+
+SELECT c.CustomerID, c.FirstName, o.OrderID, o.TotalAmount
+FROM Customers c
+RIGHT JOIN Orders o
+ON c.CustomerID = o.CustomerID;
+
+
+
+SELECT c.CustomerID, c.FirstName, o.OrderID, o.TotalAmount
+FROM Customers c
+FULL OUTER JOIN Orders o
+ON c.CustomerID = o.CustomerID;
+
+
+
+SELECT *
+FROM Customers
+WHERE CustomerID IN (
+    SELECT CustomerID
+    FROM Orders
+    WHERE TotalAmount > (SELECT AVG(TotalAmount) FROM Orders)
+);
+
+
+
+
+SELECT *
+FROM Employees
+WHERE Salary > (SELECT AVG(Salary) FROM Employees);
+
+
+
+
+SELECT OrderID,
+       YEAR(OrderDate) AS OrderYear,
+       MONTH(OrderDate) AS OrderMonth
+FROM Orders;
+
+
+
+
+
+SELECT OrderID,
+       DATEDIFF(CURRENT_DATE, OrderDate) AS DaysDifference
+FROM Orders;
+
+
+
+
+SELECT OrderID,
+       DATE_FORMAT(OrderDate, '%d-%b-%Y') AS FormattedDate
+FROM Orders;
+
+
+
+
+SELECT CustomerID,
+       CONCAT(FirstName, ' ', LastName) AS FullName
+FROM Customers;
+
+
+
+SELECT REPLACE(FirstName, 'John', 'Jonathan') AS UpdatedName
+FROM Customers;
+
+
+
+SELECT UPPER(FirstName) AS FirstName_Upper,
+       LOWER(LastName) AS LastName_Lower
+FROM Customers;
+
+
+
+
+
+SELECT TRIM(Email) AS CleanEmail
+FROM Customers;
+
+
+
+
+
+
+SELECT OrderID,
+       OrderDate,
+       TotalAmount,
+       SUM(TotalAmount) OVER (ORDER BY OrderDate) AS RunningTotal
+FROM Orders;
+
+
+
+
+
+
+SELECT OrderID,
+       TotalAmount,
+       RANK() OVER (ORDER BY TotalAmount DESC) AS OrderRank
+FROM Orders;
+
+
+
+
+
+
+
+SELECT OrderID,
+       TotalAmount,
+       CASE
+           WHEN TotalAmount > 1000 THEN '10% Discount'
+           WHEN TotalAmount > 500 THEN '5% Discount'
+           ELSE 'No Discount'
+       END AS Discount
+FROM Orders;
+
+
+
+
+
+SELECT EmployeeID,
+       Salary,
+       CASE
+           WHEN Salary >= 60000 THEN 'High'
+           WHEN Salary >= 45000 THEN 'Medium'
+           ELSE 'Low'
+       END AS SalaryCategory
+FROM Employees;
