@@ -1,0 +1,194 @@
+
+CREATE DATABASE UniversityDB;
+USE UniversityDB;
+
+/* ---------- STUDENT TABLE ---------- */
+
+CREATE TABLE Student (
+    student_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(100),
+    dob DATE,
+    admission_date DATE
+);
+
+INSERT INTO Student VALUES
+(1,'John','Doe','john@uni.com','2000-01-15','2022-08-01'),
+(2,'Jane','Smith','jane@uni.com','1999-05-25','2021-08-01'),
+(3,'Rahul','Patel','rahul@uni.com','2001-03-10','2023-08-01');
+
+/* ---------- DEPARTMENT TABLE ---------- */
+
+CREATE TABLE Department (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(50)
+);
+
+INSERT INTO Department VALUES
+(1,'Computer Science'),
+(2,'Mathematics');
+
+/* ---------- COURSE TABLE ---------- */
+
+CREATE TABLE Course (
+    course_id INT PRIMARY KEY,
+    course_name VARCHAR(100),
+    dept_id INT,
+    credits INT,
+    FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+INSERT INTO Course VALUES
+(101,'SQL Programming',1,3),
+(102,'Data Structures',2,4);
+
+/* ---------- INSTRUCTOR TABLE ---------- */
+
+CREATE TABLE Instructor (
+    instructor_id INT PRIMARY KEY,
+    fname VARCHAR(50),
+    lname VARCHAR(50),
+    email VARCHAR(100),
+    dept_id INT,
+    salary DECIMAL(10,2),
+    FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+INSERT INTO Instructor VALUES
+(1,'Alice','Johnson','alice@uni.com',1,70000),
+(2,'Bob','Lee','bob@uni.com',2,65000);
+
+/* ---------- ENROLLMENT TABLE ---------- */
+
+CREATE TABLE Enrollment (
+    enroll_id INT PRIMARY KEY,
+    student_id INT,
+    course_id INT,
+    enroll_date DATE,
+    FOREIGN KEY (student_id) REFERENCES Student(student_id),
+    FOREIGN KEY (course_id) REFERENCES Course(course_id)
+);
+
+INSERT INTO Enrollment VALUES
+(1,1,101,'2022-08-01'),
+(2,2,102,'2021-08-01'),
+(3,3,101,'2023-08-01');
+
+/* =====================================
+   QUERIES
+   ===================================== */
+
+
+
+INSERT INTO Student VALUES
+(4,'Amit','Shah','amit@uni.com','2000-02-02','2022-08-01');
+
+UPDATE Student
+SET email='amit.shah@uni.com'
+WHERE student_id=4;
+
+DELETE FROM Student
+WHERE student_id=4;
+
+
+
+SELECT *
+FROM Student
+WHERE admission_date > '2022-12-31';
+
+
+SELECT c.course_name
+FROM Course c
+JOIN Department d ON c.dept_id=d.dept_id
+WHERE d.dept_name='Mathematics'
+LIMIT 5;
+
+
+
+SELECT course_id, COUNT(student_id) AS total_students
+FROM Enrollment
+GROUP BY course_id
+HAVING COUNT(student_id) > 5;
+
+
+SELECT student_id
+FROM Enrollment
+WHERE course_id IN (101,102)
+GROUP BY student_id
+HAVING COUNT(DISTINCT course_id)=2;
+
+
+
+SELECT DISTINCT student_id
+FROM Enrollment
+WHERE course_id IN (101,102);
+
+
+
+SELECT AVG(credits) AS avg_credits
+FROM Course;
+
+
+
+SELECT MAX(salary) AS max_salary
+FROM Instructor i
+JOIN Department d ON i.dept_id=d.dept_id
+WHERE d.dept_name='Computer Science';
+
+
+SELECT d.dept_name, COUNT(e.student_id) AS total_students
+FROM Enrollment e
+JOIN Course c ON e.course_id=c.course_id
+JOIN Department d ON c.dept_id=d.dept_id
+GROUP BY d.dept_name;
+
+
+SELECT s.first_name, c.course_name
+FROM Student s
+JOIN Enrollment e ON s.student_id=e.student_id
+JOIN Course c ON e.course_id=c.course_id;
+
+
+
+SELECT s.first_name, c.course_name
+FROM Student s
+LEFT JOIN Enrollment e ON s.student_id=e.student_id
+LEFT JOIN Course c ON e.course_id=c.course_id;
+
+SELECT *
+FROM Student
+WHERE student_id IN (
+    SELECT student_id
+    FROM Enrollment
+    WHERE course_id IN (
+        SELECT course_id
+        FROM Enrollment
+        GROUP BY course_id
+        HAVING COUNT(student_id) > 10
+    )
+);
+
+
+SELECT student_id, YEAR(admission_date) AS admission_year
+FROM Student;
+
+
+
+SELECT CONCAT(fname,' ',lname) AS instructor_name
+FROM Instructor;
+
+
+SELECT course_id,
+COUNT(student_id) OVER (ORDER BY course_id) AS running_total
+FROM Enrollment;
+
+
+
+SELECT student_id, first_name,
+CASE
+    WHEN TIMESTAMPDIFF(YEAR, admission_date, CURDATE()) >= 4
+    THEN 'Senior'
+    ELSE 'Junior'
+END AS status
+FROM Student;
